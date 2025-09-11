@@ -10,33 +10,21 @@ Submission Date: September 11, 2025
 (Note: The backend is deployed on Render's free tier, which may spin down after a period of inactivity. The first load might be slow as the service restarts.)
 
 ✅ Features Implemented
-This project covers all required features and several optional ones to demonstrate a robust, real-world architecture.
-
-Secure User Authentication: Full email/password flow with registration, JWT-based login, and email verification using Nodemailer.
-
-Real-time Data Sync: A comprehensive webhook system that listens for Shopify events (Order Creation, Order Cancellation, Order Update/Fulfillment, Customer Creation) and updates the database in real-time.
-
-Scalable Background Processing: Asynchronous job handling using a Redis queue (BullMQ) and a separate Node.js worker process. This ensures the API remains fast and responsive, even under heavy webhook load.
-
-Historical Data Ingestion: Manual API endpoints to pull all historical data (Customers, Products, Orders) from a Shopify store for initial setup.
-
-Interactive Insights Dashboard:
-
-KPIs: Real-time cards for Total Revenue, Total Orders, and Total Customers.
-
-Top Customers: A live-updating list of the top 5 customers by total spend.
-
-Orders Chart: An interactive line chart showing orders over time, complete with a date-range filter.
-
-Multi-Tenant Architecture: The database schema is designed with a storeId on all relevant tables to ensure data is perfectly isolated for each connected store.
-
-Creative & Responsive UI: A modern, fully responsive "glassmorphism" UI built with React and Tailwind CSS, featuring smooth animations powered by Framer Motion.
-
-Professional Tooling: Utilizes Prisma as an ORM, Docker for managing the Redis instance, and a clean, feature-based project structure.
+    1. This project covers all required features and several optional ones to demonstrate a robust, real-world architecture.
+    2. Secure User Authentication: Full email/password flow with registration, JWT-based login, and email verification using Nodemailer.
+    3. Real-time Data Sync: A comprehensive webhook system that listens for Shopify events (Order Creation, Order Cancellation, Order Update/Fulfillment, Customer Creation) and updates the database in real-time.
+    4. Scalable Background Processing: Asynchronous job handling using a Redis queue (BullMQ) and a separate Node.js worker process. This ensures the API remains fast and responsive, even under heavy webhook load.
+    5. Historical Data Ingestion: Manual API endpoints to pull all historical data (Customers, Products, Orders) from a Shopify store for initial setup.
+    6. Interactive Insights Dashboard:
+    7. KPIs: Real-time cards for Total Revenue, Total Orders, and Total Customers.
+    8. Top Customers: A live-updating list of the top 5 customers by total spend.
+    9. Orders Chart: An interactive line chart showing orders over time, complete with a date-range filter.
+    10. Multi-Tenant Architecture: The database schema is designed with a storeId on all relevant tables to ensure data is perfectly isolated for each connected store.
+    11. Creative & Responsive UI: A modern, fully responsive "glassmorphism" UI built with React and Tailwind CSS, featuring smooth animations powered by Framer Motion.
+    12. Professional Tooling: Utilizes Prisma as an ORM, Docker for managing the Redis instance, and a clean, feature-based project structure.
 
 🏗️ Architecture Diagram
 The application is designed with a clear separation of concerns, ensuring scalability and maintainability.
-
 graph TD
     subgraph User
         A[React Frontend on Vercel]
@@ -62,14 +50,10 @@ graph TD
     C -- Manual Ingestion --> B
 
 Flow:
-
-The React Frontend fetches calculated data from the API Server.
-
-Shopify sends real-time event Webhooks to the API Server.
-
-The API Server's only job for webhooks is to quickly add them as jobs to the Redis Queue.
-
-The separate Worker process picks up jobs from the queue and performs the slow database operations on the MySQL Database.
+    1.The React Frontend fetches calculated data from the API Server.
+    2.Shopify sends real-time event Webhooks to the API Server.
+    3.The API Server's only job for webhooks is to quickly add them as jobs to the Redis Queue.
+    4.The separate Worker process picks up jobs from the queue and performs the slow database operations on the MySQL Database.
 
 🛠️ Tech Stack
 Category
