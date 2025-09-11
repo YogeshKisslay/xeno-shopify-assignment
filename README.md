@@ -71,7 +71,7 @@ The API Server's only job for webhooks is to quickly add them as jobs to the Red
 
 The separate Worker process picks up jobs from the queue and performs the slow database operations on the MySQL Database.
 
-
+---
 Category	  Technology
 Frontend	  React.js, Vite, Tailwind CSS, Axios
 Backend	    Node.js, Express.js
@@ -80,8 +80,7 @@ Queueing	  Redis, BullMQ
 DevOps	    Docker (for local Redis)
 Libraries	  Framer Motion, Recharts, Nodemailer, JWT
 
-
-
+---
 🚀 Local Setup Instructions
 Prerequisites
    Node.js (v18 or later)
@@ -122,7 +121,7 @@ Prerequisites
       2. Terminal 2 (Worker): cd server -> npm run start:worker
       3. Terminal 3 (Frontend): cd client -> npm run dev
 
-
+---
 🗄️ Database Schema (Prisma)
   // User model for dashboard authentication
       model User {
@@ -173,13 +172,14 @@ Prerequisites
         @@map("orders")
       }
 
-
+---
 📝 Assumptions & Limitations
     1.Single Tenant Config: While the architecture is multi-tenant by design, the current implementation is configured for a single store via .env variables. A full multi-tenant onboarding flow (like Shopify OAuth) would be the next step.
     2.Webhook Security: The webhook endpoints do not currently verify Shopify's HMAC signature. In a production environment, this is a critical security step to ensure that all incoming webhook requests are genuinely from Shopify.
     3.UI Refresh Mechanism: The dashboard uses polling (re-fetching data every 15 seconds) for simplicity. For a true real-time experience with less network traffic, WebSockets would be a better solution.
     4.Manual Ingestion Errors: The manual ingestion scripts do not currently have robust error handling or retry logic for individual records.
 
+---
 🔮 Next Steps to Productionize
     1.Implement Shopify OAuth: Create a proper onboarding flow where merchants can connect their stores and have their credentials stored securely in the Store table.
     2.Webhook Signature Verification: Add a middleware to verify the X-Shopify-Hmac-SHA256 header on all incoming webhooks.
