@@ -61,13 +61,16 @@ graph TD
     C -- Reads --> F
     B -- Webhooks --> C
     C -- Manual Ingestion --> B
-
-
 Flow:
-1. The React Frontend fetches calculated data from the API Server.
-2. Shopify sends real-time event Webhooks to the API Server.
-3. The API Server's only job for webhooks is to quickly add them as jobs to the Redis Queue.
-4. The separate Worker process picks up jobs from the queue and performs the slow database operations on the MySQL Database.
+
+The React Frontend fetches calculated data from the API Server.
+
+Shopify sends real-time event Webhooks to the API Server.
+
+The API Server's only job for webhooks is to quickly add them as jobs to the Redis Queue.
+
+The separate Worker process picks up jobs from the queue and performs the slow database operations on the MySQL Database.
+
 
 Category	  Technology
 Frontend	  React.js, Vite, Tailwind CSS, Axios
