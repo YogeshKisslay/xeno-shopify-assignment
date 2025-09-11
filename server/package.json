@@ -4,8 +4,9 @@
   "main": "server.js",
   "scripts": {
   "start": "nodemon src/server.js",
-  "start:prod": "npx prisma migrate deploy && node src/server.js",
-  "start:worker": "npx prisma migrate deploy && node src/worker.js",
+  "start:prod": "node src/server.js",
+  "start:worker": "node src/worker.js",
+  "db:deploy": "npx prisma migrate deploy",
   "test": "echo \"Error no test specified\" && exit 1"
 },
   "keywords": [],
