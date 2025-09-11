@@ -52,8 +52,8 @@ const getProducts = async (storeUrl, accessToken) => {
 
 const getOrders = async (storeUrl, accessToken) => {
   try {
-    // We add status=any to fetch all orders, not just open ones
-    const shopifyApiUrl = `https://${storeUrl}/admin/api/2024-04/orders.json?status=any`;
+    // --- FIX: Added financial_status filter to ignore cancelled/voided orders ---
+    const shopifyApiUrl = `https://${storeUrl}/admin/api/2024-04/orders.json?status=any&financial_status=paid,partially_refunded`;
     const response = await axios.get(shopifyApiUrl, {
       headers: {
         'X-Shopify-Access-Token': accessToken,

@@ -1,4 +1,4 @@
-// src/middleware/authMiddleware.js
+
 const jwt = require('jsonwebtoken');
 const prisma = require('../config/db');
 

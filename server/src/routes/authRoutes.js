@@ -5,7 +5,7 @@ const { authMiddleware } = require('../middleware/authMiddleware');
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.get('/verify-email/:token', verifyEmail); // New verification route
-// New route to get the logged-in user's data
+router.get('/verify-email/:token', verifyEmail); 
+
 router.get('/me', authMiddleware, getMe);
 module.exports = router;

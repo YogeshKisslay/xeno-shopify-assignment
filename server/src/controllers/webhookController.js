@@ -1,6 +1,6 @@
-// server/src/controllers/webhookController.js
 
-const { orderQueue, customerQueue } = require('../config/queue');
+
+const { orderQueue, customerQueue,orderCancellationQueue,orderUpdateQueue  } = require('../config/queue');
 
 const handleNewOrder = async (req, res) => {
   const orderData = req.body;
@@ -49,7 +49,57 @@ const handleNewCustomer = async (req, res) => {
   }
 };
 
+// --- NEW: Endpoint for when an order is cancelled/refunded ---
+const handleOrderCancellation = async (req, res) => {
+  const orderData = req.body;
+  const storeUrl = req.headers['x-shopify-shop-domain'];
+
+  if (!storeUrl) {
+    return res.status(400).json({ message: 'Shopify domain header is missing.' });
+  }
+
+  // We can ignore test webhooks here too if needed
+  if (orderData.email === 'bob@biller.com') {
+      console.log('Test order cancellation webhook received. Ignoring.');
+      return res.status(200).send('Test webhook ignored.');
+  }
+
+  try {
+    await orderCancellationQueue.add('order-cancelled', { storeUrl, orderData });
+    res.status(200).send('Webhook received.');
+  } catch (error) {
+    console.error('Failed to add order cancellation to queue:', error);
+    res.status(500).send('Error processing webhook.');
+  }
+};
+
+// --- NEW: Endpoint for when an order is updated (e.g., fulfilled) ---
+const handleOrderUpdate = async (req, res) => {
+  const orderData = req.body;
+  const storeUrl = req.headers['x-shopify-shop-domain'];
+
+  if (!storeUrl) {
+    return res.status(400).json({ message: 'Shopify domain header is missing.' });
+  }
+  
+  // To ignore test webhooks
+  if (orderData.email === 'bob@biller.com') {
+      console.log('Test order update webhook received. Ignoring.');
+      return res.status(200).send('Test webhook ignored.');
+  }
+
+  try {
+    await orderUpdateQueue.add('order-updated', { storeUrl, orderData });
+    res.status(200).send('Webhook received.');
+  } catch (error) {
+    console.error('Failed to add order update to queue:', error);
+    res.status(500).send('Error processing webhook.');
+  }
+};
+
 module.exports = {
   handleNewOrder,
   handleNewCustomer,
+  handleOrderCancellation,
+  handleOrderUpdate
 };

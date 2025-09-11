@@ -1,4 +1,3 @@
-// server/server.js
 
 const express = require('express');
 require('dotenv').config();
@@ -6,8 +5,8 @@ require('dotenv').config();
 // Import routes
 const authRoutes = require('./src/routes/authRoutes');
 const shopifyRoutes = require('./src/routes/shopifyRoutes');
-const insightsRoutes = require('./src/routes/insightsRoutes'); // Import new routes
-const webhookRoutes = require('./src/routes/webhookRoutes'); // Import webhook routes
+const insightsRoutes = require('./src/routes/insightsRoutes');
+const webhookRoutes = require('./src/routes/webhookRoutes');
 
 
 const app = express();
@@ -18,8 +17,8 @@ const PORT = process.env.PORT || 5001;
 // --- API Routes ---
 app.use('/api/auth', authRoutes);
 app.use('/api/shopify', shopifyRoutes);
-app.use('/api/insights', insightsRoutes); // Use the new routes
-app.use('/api/webhooks', webhookRoutes); // Use the webhook routes
+app.use('/api/insights', insightsRoutes); 
+app.use('/api/webhooks', webhookRoutes); 
 
 
 app.listen(PORT, () => {

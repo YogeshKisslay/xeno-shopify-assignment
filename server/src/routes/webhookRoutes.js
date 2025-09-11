@@ -1,10 +1,10 @@
-// server/src/routes/webhookRoutes.js
 
 const express = require('express');
 const router = express.Router();
-const { handleNewOrder, handleNewCustomer} = require('../controllers/webhookController');
+const { handleNewOrder, handleNewCustomer, handleOrderCancellation,handleOrderUpdate} = require('../controllers/webhookController');
 
-// Note: Shopify webhook verification should be added here in a real app
 router.post('/order-created', handleNewOrder);
-router.post('/customer-created', handleNewCustomer); // Add the new route
+router.post('/customer-created', handleNewCustomer);
+router.post('/order-cancelled', handleOrderCancellation);
+router.post('/order-updated', handleOrderUpdate);
 module.exports = router;

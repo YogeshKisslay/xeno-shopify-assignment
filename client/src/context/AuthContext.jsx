@@ -1,7 +1,6 @@
-// client/src/context/AuthContext.jsx
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import api from '../api/axios'; // <-- CHANGE THIS LINE
+import api from '../api/axios';
 
 const AuthContext = createContext();
 
@@ -17,9 +16,9 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const fetchUser = async () => {
       if (token) {
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`; // Use our instance
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         try {
-          const response = await api.get('/api/auth/me'); // Use our instance
+          const response = await api.get('/api/auth/me');
           setUser(response.data);
         } catch (error) {
           console.error('Failed to fetch user with token:', error);
@@ -34,7 +33,7 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const login = async (email, password) => {
-    const response = await api.post('/api/auth/login', { email, password }); // Use our instance
+    const response = await api.post('/api/auth/login', { email, password });
     localStorage.setItem('token', response.data.token);
     setToken(response.data.token);
     setUser(response.data.user);
@@ -42,7 +41,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (name, email, password) => {
-    const response = await api.post('/api/auth/register', { name, email, password }); // Use our instance
+    const response = await api.post('/api/auth/register', { name, email, password });
     return response.data;
   };
 
@@ -50,7 +49,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
-    delete api.defaults.headers.common['Authorization']; // Use our instance
+    delete api.defaults.headers.common['Authorization'];
   };
 
   const value = {

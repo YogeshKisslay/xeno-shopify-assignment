@@ -1,4 +1,3 @@
-// server/src/controllers/insightsController.js
 
 const prisma = require('../config/db');
 

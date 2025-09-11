@@ -1,10 +1,9 @@
-// src/controllers/ingestionController.js
+
 const prisma = require('../config/db');
 const { getCustomers, getProducts,getOrders } = require('../services/shopifyService');
 
 
 const ingestCustomers = async (req, res) => {
-  // For now, we will hardcode the store details. Later, this will be dynamic.
   const storeUrl = process.env.SHOPIFY_STORE_URL;
   const accessToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
 
@@ -17,7 +16,7 @@ const ingestCustomers = async (req, res) => {
           storeUrl,
           // In a real app, encrypt the access token!
           accessToken,
-          // We'll add a placeholder for shopifyId for now
+          // a placeholder for shopifyId for now
           shopifyId: "temp-id-" + Date.now(),
         },
       });

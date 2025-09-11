@@ -1,19 +1,13 @@
-// client/src/components/dashboard/StatCard.jsx
 
 import React from 'react';
+import { motion } from 'framer-motion';
 
-const StatCard = ({ title, value, icon, isLoading }) => {
+const StatCard = ({ title, value, icon, isLoading, animationVariants, color }) => {
   const formatValue = (val) => {
-    if (isLoading) {
-      return <div className="w-16 h-8 bg-gray-200 rounded animate-pulse"></div>;
-    }
     if (typeof val === 'number') {
-      // Check if it's a currency value
       if (title.toLowerCase().includes('revenue')) {
         return new Intl.NumberFormat('en-IN', {
-          style: 'currency',
-          currency: 'INR',
-          minimumFractionDigits: 0,
+          style: 'currency', currency: 'INR', minimumFractionDigits: 0,
         }).format(val);
       }
       return new Intl.NumberFormat('en-IN').format(val);
@@ -22,19 +16,25 @@ const StatCard = ({ title, value, icon, isLoading }) => {
   };
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md">
+    <motion.div
+      variants={animationVariants}
+      className="p-6 overflow-hidden text-white transition-all duration-300 ease-in-out transform rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-2"
+      style={{ background: `linear-gradient(135deg, ${color[0]} 0%, ${color[1]} 100%)` }}
+    >
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-500">{title}</p>
-          <p className="mt-1 text-3xl font-bold text-gray-900">
-            {formatValue(value)}
-          </p>
+        <div className="flex flex-col">
+          <p className="text-lg font-medium text-white/80">{title}</p>
+          <div className="mt-1 text-4xl font-bold">
+            {isLoading ? (
+              <div className="w-24 h-10 mt-1 bg-white/30 rounded-md animate-pulse"></div>
+            ) : (
+              formatValue(value)
+            )}
+          </div>
         </div>
-        <div className="flex items-center justify-center w-12 h-12 text-white bg-indigo-500 rounded-full">
-          {icon}
-        </div>
+        <div className="text-white/50">{icon}</div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
