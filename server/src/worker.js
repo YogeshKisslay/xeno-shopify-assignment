@@ -5,10 +5,20 @@ const prisma = require('./config/db');
 
 console.log('Worker process started...');
 
-const connection = {
-  host: 'localhost',
-  port: 6379,
+// --- FIX: Dynamically parse the REDIS_URL from environment variables ---
+const parseRedisUrl = () => {
+  if (process.env.REDIS_URL) {
+    const redisUrl = new URL(process.env.REDIS_URL);
+    return {
+      host: redisUrl.hostname,
+      port: redisUrl.port,
+      password: redisUrl.password,
+    };
+  }
+  return { host: 'localhost', port: 6379 };
 };
+
+const connection = parseRedisUrl();
 
 // --- JOB PROCESSOR 1: For Orders 
 const processOrderJob = async (job) => {
