@@ -1,52 +1,70 @@
+// client/src/App.jsx
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { AnimatePresence } from 'framer-motion';
 
+// New Components
 import Layout from './components/Layout';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+import LoginModal from './components/LoginModal';
+import RegisterModal from './components/RegisterModal';
+
+// Pages
+import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import ProfilePage from './pages/ProfilePage';
 
-const ProtectedRoute = () => {
-  const { token, loading } = useAuth();
-  if (loading) return <div>Loading...</div>;
-  return token ? <Outlet /> : <Navigate to="/login" />;
-};
+// This special component allows us to use hooks like useLocation
+const AppContent = () => {
+    const location = useLocation();
+    
+    const ProtectedRoute = () => {
+      const { token, loading } = useAuth();
+      if (loading) return <div>Loading...</div>;
+      // --- FIX: Redirect to the public landing page if not logged in ---
+      return token ? <Outlet /> : <Navigate to="/" />;
+    };
 
-const PublicRoute = () => {
-    const { token, loading } = useAuth();
-    if(loading) return <div>Loading...</div>;
-    return token ? <Navigate to="/" /> : <Outlet />;
+    return (
+        <>
+            {/* The main page routes */}
+            <Routes location={location} key={location.pathname}>
+                <Route path="/" element={<Layout />}>
+                    {/* --- THE MAIN FIX IS HERE --- */}
+                    {/* This tells the router to show the LandingPage for all these paths */}
+                    <Route index element={<LandingPage />} />
+                    <Route path="login" element={<LandingPage />} />
+                    <Route path="register" element={<LandingPage />} />
+                    
+                    {/* All routes inside here are protected */}
+                    <Route element={<ProtectedRoute />}>
+                        <Route path="dashboard" element={<DashboardPage />} />
+                        <Route path="profile" element={<ProfilePage />} />
+                    </Route>
+                </Route>
+
+                <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
+                <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+            
+            {/* This renders the modals on top of the current page */}
+            <AnimatePresence>
+                {location.pathname === '/login' && <LoginModal />}
+                {location.pathname === '/register' && <RegisterModal />}
+            </AnimatePresence>
+        </>
+    );
 }
 
 function App() {
   return (
     <Router>
       <ToastContainer position="top-right" autoClose={5000} theme="light" />
-      <Routes>
-        {/* Public Routes - No Layout, redirect if logged in */}
-        <Route element={<PublicRoute />}>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-        </Route>
-        
-        <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
-        
-        {/* Protected Routes - All nested inside the Layout */}
-        <Route element={<ProtectedRoute />}>
-          <Route element={<Layout />}>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-          </Route>
-        </Route>
-        
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+      <AppContent />
     </Router>
   );
 }
