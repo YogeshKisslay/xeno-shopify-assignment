@@ -51,7 +51,7 @@ console.log("--- RAILWAY ENVIRONMENT VARIABLES (API SERVER) ---");
 console.log(process.env);
 console.log("-------------------------------------------------");
 
-require('dotenv').config();
+// require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 

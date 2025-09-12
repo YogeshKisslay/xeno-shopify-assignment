@@ -19,7 +19,7 @@
 console.log("--- RAILWAY ENVIRONMENT VARIABLES (WORKER) ---");
 console.log(process.env);
 console.log("----------------------------------------------");
-require('dotenv').config(); // This is still needed for local development
+// require('dotenv').config(); // This is still needed for local development
 const { Worker } = require('bullmq');
 const prisma = require('./config/db');
 
