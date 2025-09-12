@@ -2,10 +2,17 @@
 
 const { Queue } = require('bullmq');
 
-// This is correct. It will now correctly find process.env.REDIS_URL
-// because server.js loads the variables first.
-const connection = process.env.REDIS_URL;
+// --- THE FINAL FIX ---
+// This connection object is now smart.
+// It uses the Railway-provided environment variables if they exist.
+// If not, it falls back to 'localhost' for your local development.
+const connection = {
+  host: process.env.REDISHOST || 'localhost',
+  port: process.env.REDISPORT || 6379,
+  password: process.env.REDISPASSWORD || undefined,
+};
 
+// We no longer need lazy initialization. Let the library connect directly.
 const orderQueue = new Queue('order-processing', { connection });
 const customerQueue = new Queue('customer-processing', { connection });
 const orderCancellationQueue = new Queue('order-cancellation-processing', { connection });

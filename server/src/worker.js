@@ -21,8 +21,13 @@ const prisma = require('./config/db');
 console.log('Worker process started...');
 
 // --- THE FINAL FIX ---
-// The exact same simple connection logic as in queue.js.
-const connection = process.env.REDIS_URL;
+// The exact same smart connection object as in queue.js.
+// This will work correctly on both Railway and your local machine.
+const connection = {
+  host: process.env.REDISHOST || 'localhost',
+  port: process.env.REDISPORT || 6379,
+  password: process.env.REDISPASSWORD || undefined,
+};
 
 // --- All your job processor functions (processOrderJob, etc.) remain exactly the same ---
 const processOrderJob = async (job) => {
