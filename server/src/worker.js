@@ -12,8 +12,8 @@
 
 // const connection = parseRedisUrl();
 
-server/src/worker.js
-server/src/worker.js
+// server/src/worker.js
+// server/src/worker.js
 
 require('dotenv').config(); // This is still needed for local development
 const { Worker } = require('bullmq');
