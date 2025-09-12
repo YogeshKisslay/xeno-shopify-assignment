@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-  "start": "nodemon --exec node -r dotenv/config server.js",
-  "start:prod": "node -r dotenv/config server.js",
-  "start:worker": "node -r dotenv/config src/worker.js",
-  "db:deploy": "npx prisma migrate deploy",
+  "start": "nodemon -r dotenv/config server.js",
+  "start:prod": "sleep 15 && npx prisma migrate deploy && node server.js",
+  "start:worker": "sleep 15 && npx prisma migrate deploy && node src/worker.js",
   "test": "echo \"Error no test specified\" && exit 1"
 },
 
