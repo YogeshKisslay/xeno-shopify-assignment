@@ -1,6 +1,6 @@
 
 
-const { orderQueue, customerQueue,orderCancellationQueue,orderUpdateQueue  } = require('../config/queue');
+const { queues } = require('../config/queue');
 
 const handleNewOrder = async (req, res) => {
   const orderData = req.body;
@@ -18,7 +18,9 @@ const handleNewOrder = async (req, res) => {
   }
 
   try {
-    await orderQueue.add('new-order', { storeUrl, orderData });
+    // await orderQueue.add('new-order', { storeUrl, orderData });
+    // res.status(200).send('Webhook received.');
+    await queues.orderQueue.add('new-order', { storeUrl, orderData });
     res.status(200).send('Webhook received.');
   } catch (error) {
     console.error('Failed to add order to queue:', error);
@@ -41,7 +43,9 @@ const handleNewCustomer = async (req, res) => {
   }
 
   try {
-    await customerQueue.add('new-customer', { storeUrl, customerData });
+    // await customerQueue.add('new-customer', { storeUrl, customerData });
+    // res.status(200).send('Webhook received.');
+    await queues.customerQueue.add('new-customer', { storeUrl, customerData });
     res.status(200).send('Webhook received.');
   } catch (error) {
     console.error('Failed to add customer to queue:', error);
@@ -65,7 +69,9 @@ const handleOrderCancellation = async (req, res) => {
   }
 
   try {
-    await orderCancellationQueue.add('order-cancelled', { storeUrl, orderData });
+    // await orderCancellationQueue.add('order-cancelled', { storeUrl, orderData });
+    // res.status(200).send('Webhook received.');
+    await queues.orderCancellationQueue.add('order-cancelled', { storeUrl, orderData });
     res.status(200).send('Webhook received.');
   } catch (error) {
     console.error('Failed to add order cancellation to queue:', error);
@@ -89,7 +95,9 @@ const handleOrderUpdate = async (req, res) => {
   }
 
   try {
-    await orderUpdateQueue.add('order-updated', { storeUrl, orderData });
+    // await orderUpdateQueue.add('order-updated', { storeUrl, orderData });
+    // res.status(200).send('Webhook received.');
+    await queues.orderUpdateQueue.add('order-updated', { storeUrl, orderData });
     res.status(200).send('Webhook received.');
   } catch (error) {
     console.error('Failed to add order update to queue:', error);
