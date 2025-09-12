@@ -115,7 +115,7 @@ const prisma = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const { sendVerificationEmail } = require('../services/emailService');
+const { sendVerificationEmail } = require('../services/emailServices');
 
 const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
