@@ -63,6 +63,44 @@
 // server/src/config/queue.js
 // server/src/config/queue.js
 
+// const { Queue } = require('bullmq');
+
+// // This is a robust function to parse a Redis URL string.
+// const parseRedisUrl = (redisUrl) => {
+//   if (!redisUrl) {
+//     // Fallback for local development if REDIS_URL is not set
+//     return { host: 'localhost', port: 6379 };
+//   }
+//   try {
+//     const url = new URL(redisUrl);
+//     return {
+//       host: url.hostname,
+//       port: Number(url.port),
+//       password: url.password,
+//       // Upstash requires a secure TLS connection. This is critical.
+//       tls: {}, 
+//     };
+//   } catch (e) {
+//     console.error("Invalid REDIS_URL, falling back to localhost");
+//     return { host: 'localhost', port: 6379 };
+//   }
+// };
+
+// const connection = parseRedisUrl(process.env.REDIS_URL);
+
+// // We now pass the correctly formatted connection object.
+// const orderQueue = new Queue('order-processing', { connection });
+// const customerQueue = new Queue('customer-processing', { connection });
+// const orderCancellationQueue = new Queue('order-cancellation-processing', { connection });
+// const orderUpdateQueue = new Queue('order-update-processing', { connection });
+
+// module.exports = {
+//   orderQueue,
+//   customerQueue,
+//   orderCancellationQueue,
+//   orderUpdateQueue,
+// };
+
 const { Queue } = require('bullmq');
 
 // This is a robust function to parse a Redis URL string.
@@ -73,13 +111,20 @@ const parseRedisUrl = (redisUrl) => {
   }
   try {
     const url = new URL(redisUrl);
-    return {
+    const connectionOptions = {
       host: url.hostname,
       port: Number(url.port),
       password: url.password,
-      // Upstash requires a secure TLS connection. This is critical.
-      tls: {}, 
     };
+
+    // --- THE FINAL FIX IS HERE ---
+    // If the protocol is 'rediss:', it means we need a secure TLS connection.
+    // This is required by Upstash and most cloud Redis providers.
+    if (url.protocol === 'rediss:') {
+      connectionOptions.tls = {};
+    }
+
+    return connectionOptions;
   } catch (e) {
     console.error("Invalid REDIS_URL, falling back to localhost");
     return { host: 'localhost', port: 6379 };
@@ -87,16 +132,3 @@ const parseRedisUrl = (redisUrl) => {
 };
 
 const connection = parseRedisUrl(process.env.REDIS_URL);
-
-// We now pass the correctly formatted connection object.
-const orderQueue = new Queue('order-processing', { connection });
-const customerQueue = new Queue('customer-processing', { connection });
-const orderCancellationQueue = new Queue('order-cancellation-processing', { connection });
-const orderUpdateQueue = new Queue('order-update-processing', { connection });
-
-module.exports = {
-  orderQueue,
-  customerQueue,
-  orderCancellationQueue,
-  orderUpdateQueue,
-};

@@ -8,7 +8,6 @@ const { Worker } = require('bullmq');
 const prisma = require('./config/db');
 
 console.log('Worker process started...');
-
 // The exact same robust parsing function as in queue.js.
 const parseRedisUrl = (redisUrl) => {
   if (!redisUrl) {
@@ -16,13 +15,19 @@ const parseRedisUrl = (redisUrl) => {
   }
   try {
     const url = new URL(redisUrl);
-    return {
+    const connectionOptions = {
       host: url.hostname,
       port: Number(url.port),
       password: url.password,
-      // Upstash requires a secure TLS connection. This is critical.
-      tls: {},
     };
+
+    // --- THE FINAL FIX IS HERE ---
+    // Enable TLS if the URL protocol is 'rediss:'.
+    if (url.protocol === 'rediss:') {
+      connectionOptions.tls = {};
+    }
+
+    return connectionOptions;
   } catch (e) {
     console.error("Invalid REDIS_URL, falling back to localhost");
     return { host: 'localhost', port: 6379 };
@@ -30,7 +35,6 @@ const parseRedisUrl = (redisUrl) => {
 };
 
 const connection = parseRedisUrl(process.env.REDIS_URL);
-
 // --- All your job processor functions (processOrderJob, etc.) remain exactly the same ---
 const processOrderJob = async (job) => {
   console.log(`Processing ORDER job ${job.id}...`);
