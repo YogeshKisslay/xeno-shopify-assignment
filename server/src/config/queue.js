@@ -102,7 +102,6 @@
 // };
 
 const { Queue } = require('bullmq');
-
 // This is a robust function to parse a Redis URL string.
 const parseRedisUrl = (redisUrl) => {
   if (!redisUrl) {
@@ -119,7 +118,7 @@ const parseRedisUrl = (redisUrl) => {
 
     // --- THE FINAL FIX IS HERE ---
     // If the protocol is 'rediss:', it means we need a secure TLS connection.
-    // This is required by Upstash and most cloud Redis providers.
+    // Railway and Upstash both require this for public connections.
     if (url.protocol === 'rediss:') {
       connectionOptions.tls = {};
     }
@@ -132,3 +131,15 @@ const parseRedisUrl = (redisUrl) => {
 };
 
 const connection = parseRedisUrl(process.env.REDIS_URL);
+// We now pass the correctly formatted connection object.
+const orderQueue = new Queue('order-processing', { connection });
+const customerQueue = new Queue('customer-processing', { connection });
+const orderCancellationQueue = new Queue('order-cancellation-processing', { connection });
+const orderUpdateQueue = new Queue('order-update-processing', { connection });
+
+module.exports = {
+  orderQueue,
+  customerQueue,
+  orderCancellationQueue,
+  orderUpdateQueue,
+};

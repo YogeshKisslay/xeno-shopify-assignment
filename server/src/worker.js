@@ -8,9 +8,10 @@ const { Worker } = require('bullmq');
 const prisma = require('./config/db');
 
 console.log('Worker process started...');
-// The exact same robust parsing function as in queue.js.
+// This is a robust function to parse a Redis URL string.
 const parseRedisUrl = (redisUrl) => {
   if (!redisUrl) {
+    // Fallback for local development if REDIS_URL is not set
     return { host: 'localhost', port: 6379 };
   }
   try {
@@ -22,7 +23,8 @@ const parseRedisUrl = (redisUrl) => {
     };
 
     // --- THE FINAL FIX IS HERE ---
-    // Enable TLS if the URL protocol is 'rediss:'.
+    // If the protocol is 'rediss:', it means we need a secure TLS connection.
+    // Railway and Upstash both require this for public connections.
     if (url.protocol === 'rediss:') {
       connectionOptions.tls = {};
     }
