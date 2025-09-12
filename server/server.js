@@ -4,7 +4,6 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
-// Import routes
 const authRoutes = require('./src/routes/authRoutes');
 const shopifyRoutes = require('./src/routes/shopifyRoutes');
 const insightsRoutes = require('./src/routes/insightsRoutes');
