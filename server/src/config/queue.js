@@ -41,16 +41,7 @@
 
 const { Queue } = require('bullmq');
 
-// --- THE FINAL FIX ---
-// This connection object is now smart and robust.
-// It uses the Railway environment variables if they exist.
-// If not, it falls back to 'localhost' for your local development.
-const connection = {
-  host: process.env.REDISHOST || 'localhost',
-  port: process.env.REDISPORT || 6379,
-  password: process.env.REDISPASSWORD || undefined,
-};
-
+// This object will hold our queues, but they will be null at first.
 const queues = {
   orderQueue: null,
   customerQueue: null,
@@ -58,8 +49,15 @@ const queues = {
   orderUpdateQueue: null,
 };
 
-// This function now uses the smart connection object.
+// This is an initialization function that we will call from our main server file.
 const initializeQueues = () => {
+  // This is the correct way to get the connection details on Railway
+  const connection = {
+    host: process.env.REDISHOST,
+    port: process.env.REDISPORT,
+    password: process.env.REDISPASSWORD,
+  };
+
   queues.orderQueue = new Queue('order-processing', { connection });
   queues.customerQueue = new Queue('customer-processing', { connection });
   queues.orderCancellationQueue = new Queue('order-cancellation-processing', { connection });
