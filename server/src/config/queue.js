@@ -59,10 +59,25 @@
 
 
 // server/src/config/queue.js
+// server/src/config/queue.js
 
 const { Queue } = require('bullmq');
 
-// This object will hold our queues, but they will be null at first.
+const parseRedisUrl = () => {
+  if (process.env.REDIS_URL) {
+    const redisUrl = new URL(process.env.REDIS_URL);
+    return {
+      host: redisUrl.hostname,
+      port: redisUrl.port,
+      password: redisUrl.password,
+    };
+  }
+  // Fallback for local development
+  return { host: 'localhost', port: 6379 };
+};
+
+const connection = parseRedisUrl();
+
 const queues = {
   orderQueue: null,
   customerQueue: null,
@@ -70,14 +85,7 @@ const queues = {
   orderUpdateQueue: null,
 };
 
-// This is an initialization function that we will call from our main server file.
 const initializeQueues = () => {
-  const connection = {
-    host: process.env.REDISHOST,
-    port: process.env.REDISPORT,
-    password: process.env.REDISPASSWORD,
-  };
-
   queues.orderQueue = new Queue('order-processing', { connection });
   queues.customerQueue = new Queue('customer-processing', { connection });
   queues.orderCancellationQueue = new Queue('order-cancellation-processing', { connection });

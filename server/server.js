@@ -3,7 +3,9 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const { initializeQueues } = require('./src/config/queue');
+
+// We now import the initializer function
+const { initializeQueues } = require('./src/config/queue'); 
 
 const authRoutes = require('./src/routes/authRoutes');
 const shopifyRoutes = require('./src/routes/shopifyRoutes');
@@ -32,13 +34,10 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5001;
 
-// --- NEW: Health Check Route ---
-// This is the route Railway will ping to check if our server is alive.
 app.get('/', (req, res) => {
   res.status(200).send('Server is healthy and running!');
 });
 
-// --- API Routes ---
 app.use('/api/auth', authRoutes);
 app.use('/api/shopify', shopifyRoutes);
 app.use('/api/insights', insightsRoutes);
