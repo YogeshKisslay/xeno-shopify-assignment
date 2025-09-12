@@ -2,7 +2,6 @@
 console.log("--- RAILWAY ENVIRONMENT VARIABLES (WORKER) ---");
 console.log(process.env);
 console.log("----------------------------------------------");
-require('dotenv').config(); 
 
 const { Worker } = require('bullmq');
 const prisma = require('./config/db');
