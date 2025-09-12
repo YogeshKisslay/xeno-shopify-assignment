@@ -1,26 +1,35 @@
+// const parseRedisUrl = () => {
+//   if (process.env.REDIS_URL) {
+//     const redisUrl = new URL(process.env.REDIS_URL);
+//     return {
+//       host: redisUrl.hostname,
+//       port: redisUrl.port,
+//       password: redisUrl.password,
+//     };
+//   }
+//   return { host: 'localhost', port: 6379 };
+// };
 
-require('dotenv').config();
+// const connection = parseRedisUrl();
+
+// server/src/worker.js
+
+require('dotenv').config(); // This is still needed for local development
 const { Worker } = require('bullmq');
 const prisma = require('./config/db');
 
 console.log('Worker process started...');
 
-// --- FIX: Dynamically parse the REDIS_URL from environment variables ---
-const parseRedisUrl = () => {
-  if (process.env.REDIS_URL) {
-    const redisUrl = new URL(process.env.REDIS_URL);
-    return {
-      host: redisUrl.hostname,
-      port: redisUrl.port,
-      password: redisUrl.password,
-    };
-  }
-  return { host: 'localhost', port: 6379 };
+// --- THE FINAL FIX ---
+// The exact same smart connection object as in queue.js.
+// This will work correctly on both Railway and your local machine.
+const connection = {
+  host: process.env.REDISHOST || 'localhost',
+  port: process.env.REDISPORT || 6379,
+  password: process.env.REDISPASSWORD || undefined,
 };
 
-const connection = parseRedisUrl();
-
-// --- JOB PROCESSOR 1: For Orders 
+// --- All your job processor functions (processOrderJob, etc.) remain exactly the same ---
 const processOrderJob = async (job) => {
   console.log(`Processing ORDER job ${job.id}...`);
   const { storeUrl, orderData } = job.data;
@@ -52,35 +61,26 @@ const processOrderJob = async (job) => {
     });
     console.log(`Successfully saved order ${order.id}.`);
 
-    // After saving the order, we re-calculate the customer's total stats from scratch
-    // to ensure data is always accurate, even if webhooks arrive out of order.
     const customerOrders = await prisma.order.findMany({ where: { customerId: customer.id } });
     const totalSpent = customerOrders.reduce((sum, o) => sum + o.totalPrice, 0);
     
     await prisma.customer.update({
         where: { id: customer.id },
-        data: {
-            ordersCount: customerOrders.length,
-            totalSpent: totalSpent
-        }
+        data: { ordersCount: customerOrders.length, totalSpent: totalSpent }
     });
     console.log(`Successfully updated stats for customer ${customer.id}.`);
-
   } catch (error) {
     console.error(`Failed to process order job ${job.id}:`, error.message);
     throw error;
   }
 };
-// --- JOB PROCESSOR 2: For Customers  ---
+
 const processCustomerJob = async (job) => {
   console.log(`Processing CUSTOMER job ${job.id}...`);
   const { storeUrl, customerData } = job.data;
-
   try {
     const store = await prisma.store.findUnique({ where: { storeUrl } });
-    if (!store) {
-      throw new Error(`Store not found for URL: ${storeUrl}`);
-    }
+    if (!store) throw new Error(`Store not found for URL: ${storeUrl}`);
 
     const customer = customerData;
     const dbCustomerData = {
@@ -88,7 +88,6 @@ const processCustomerJob = async (job) => {
       email: customer.email,
       firstName: customer.first_name,
       lastName: customer.last_name,
-      // --- FIX: Provide a default value of 0 if the data is missing ---
       totalSpent: parseFloat(customer.total_spent) || 0,
       ordersCount: customer.orders_count || 0,
       storeId: store.id,
@@ -99,79 +98,50 @@ const processCustomerJob = async (job) => {
       update: dbCustomerData,
       create: dbCustomerData,
     });
-
     console.log(`Successfully processed and saved customer ${customer.id}.`);
   } catch (error) {
     console.error(`Failed to process job ${job.id}:`, error.message);
     throw error;
   }
 };
-// --- NEW JOB PROCESSOR 3: For Order Cancellations ---
+
 const processOrderCancellationJob = async (job) => {
   console.log(`Processing ORDER CANCELLATION job ${job.id}...`);
   const { storeUrl, orderData } = job.data;
-
   try {
     const orderShopifyId = `gid://shopify/Order/${orderData.id}`;
-
-    // Find the order in our database
     const order = await prisma.order.findUnique({ where: { shopifyId: orderShopifyId } });
-
-    // If we don't have this order, there's nothing to do
-    if (!order) {
-      console.log(`Cancelled order ${orderData.id} not found in our DB. Ignoring.`);
-      return;
-    }
+    if (!order) return console.log(`Cancelled order ${orderData.id} not found in our DB. Ignoring.`);
     
-    // Delete the cancelled order from our database
     await prisma.order.delete({ where: { id: order.id } });
     console.log(`Successfully deleted cancelled order ${orderData.id}.`);
 
-    // Now, re-calculate the customer's stats to reflect the removal of the order
     const customerOrders = await prisma.order.findMany({ where: { customerId: order.customerId } });
     const totalSpent = customerOrders.reduce((sum, o) => sum + o.totalPrice, 0);
     
     await prisma.customer.update({
         where: { id: order.customerId },
-        data: {
-            ordersCount: customerOrders.length,
-            totalSpent: totalSpent
-        }
+        data: { ordersCount: customerOrders.length, totalSpent: totalSpent }
     });
     console.log(`Successfully updated stats for customer ${order.customerId} after cancellation.`);
-
   } catch (error) {
     console.error(`Failed to process cancellation job ${job.id}:`, error.message);
     throw error;
   }
 };
 
-// --- NEW JOB PROCESSOR 4: For Order Updates ---
 const processOrderUpdateJob = async (job) => {
   console.log(`Processing ORDER UPDATE job ${job.id}...`);
   const { orderData } = job.data;
   const orderShopifyId = `gid://shopify/Order/${orderData.id}`;
-
   try {
-    // Find the order that already exists in our database
-    const orderInDb = await prisma.order.findUnique({
-      where: { shopifyId: orderShopifyId },
-    });
+    const orderInDb = await prisma.order.findUnique({ where: { shopifyId: orderShopifyId } });
+    if (!orderInDb) return console.log(`Order ${orderData.id} for update not found in our DB.`);
 
-    // If we don't have this order in our DB, we can't update it.
-    if (!orderInDb) {
-      console.log(`Order ${orderData.id} for update not found in our DB. It might be a new order; the creation webhook will handle it.`);
-      return;
-    }
-
-    // Update the fulfillment status
     await prisma.order.update({
       where: { id: orderInDb.id },
-      data: {
-        fulfillmentStatus: orderData.fulfillment_status || orderInDb.fulfillmentStatus,
-      },
+      data: { fulfillmentStatus: orderData.fulfillment_status || orderInDb.fulfillmentStatus },
     });
-
     console.log(`Successfully updated fulfillment status for order ${orderData.id}.`);
   } catch (error) {
     console.error(`Failed to process order update job ${job.id}:`, error.message);
@@ -180,13 +150,16 @@ const processOrderUpdateJob = async (job) => {
 };
 
 // --- WORKER SETUP ---
-const orderWorker = new Worker('order-processing', processOrderJob, { connection });
-const customerWorker = new Worker('customer-processing', processCustomerJob, { connection });
-const orderCancellationWorker = new Worker('order-cancellation-processing', processOrderCancellationJob, { connection });
-const orderUpdateWorker = new Worker('order-update-processing', processOrderUpdateJob, { connection });
+const orderWorker = new Worker('order-processing', processOrderJob, { connection, concurrency: 5 });
+const customerWorker = new Worker('customer-processing', processCustomerJob, { connection, concurrency: 5 });
+const orderCancellationWorker = new Worker('order-cancellation-processing', processOrderCancellationJob, { connection, concurrency: 5 });
+const orderUpdateWorker = new Worker('order-update-processing', processOrderUpdateJob, { connection, concurrency: 5 });
 
-
-// ... (Event listeners for logging also need to be added for the new worker)
+// --- EVENT LISTENERS ---
+orderWorker.on('completed', (job) => console.log(`Order job ${job.id} has completed!`));
+orderWorker.on('failed', (job, err) => console.log(`Order job ${job.id} has failed: ${err.message}`));
+customerWorker.on('completed', (job) => console.log(`Customer job ${job.id} has completed!`));
+customerWorker.on('failed', (job, err) => console.log(`Customer job ${job.id} has failed: ${err.message}`));
 orderCancellationWorker.on('completed', (job) => console.log(`Cancellation job ${job.id} has completed!`));
 orderCancellationWorker.on('failed', (job, err) => console.log(`Cancellation job ${job.id} has failed: ${err.message}`));
 orderUpdateWorker.on('completed', (job) => console.log(`Update job ${job.id} has completed!`));
