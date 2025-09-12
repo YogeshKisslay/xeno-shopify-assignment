@@ -109,7 +109,12 @@
 
 // server/src/controllers/webhookController.js
 
-const { queues } = require('../config/queue'); // Import the queues object
+const { 
+  orderQueue, 
+  customerQueue, 
+  orderCancellationQueue, 
+  orderUpdateQueue 
+} = require('../config/queue');
 
 const handleNewOrder = async (req, res) => {
   const orderData = req.body;
@@ -120,7 +125,8 @@ const handleNewOrder = async (req, res) => {
   if (!storeUrl) return res.status(400).json({ message: 'Shopify domain header is missing.' });
 
   try {
-    await queues.orderQueue.add('new-order', { storeUrl, orderData });
+    // Now we use 'orderQueue' directly
+    await orderQueue.add('new-order', { storeUrl, orderData });
     res.status(200).send('Webhook received.');
   } catch (error) {
     console.error('Failed to add order to queue:', error);
@@ -137,7 +143,8 @@ const handleNewCustomer = async (req, res) => {
   if (!storeUrl) return res.status(400).json({ message: 'Shopify domain header is missing.' });
   
   try {
-    await queues.customerQueue.add('new-customer', { storeUrl, customerData });
+    // Now we use 'customerQueue' directly
+    await customerQueue.add('new-customer', { storeUrl, customerData });
     res.status(200).send('Webhook received.');
   } catch (error) {
     console.error('Failed to add customer to queue:', error);
@@ -154,7 +161,8 @@ const handleOrderCancellation = async (req, res) => {
   if (!storeUrl) return res.status(400).json({ message: 'Shopify domain header is missing.' });
 
   try {
-    await queues.orderCancellationQueue.add('order-cancelled', { storeUrl, orderData });
+    // Now we use 'orderCancellationQueue' directly
+    await orderCancellationQueue.add('order-cancelled', { storeUrl, orderData });
     res.status(200).send('Webhook received.');
   } catch (error) {
     console.error('Failed to add order cancellation to queue:', error);
@@ -171,7 +179,8 @@ const handleOrderUpdate = async (req, res) => {
   if (!storeUrl) return res.status(400).json({ message: 'Shopify domain header is missing.' });
   
   try {
-    await queues.orderUpdateQueue.add('order-updated', { storeUrl, orderData });
+    // Now we use 'orderUpdateQueue' directly
+    await orderUpdateQueue.add('order-updated', { storeUrl, orderData });
     res.status(200).send('Webhook received.');
   } catch (error) {
     console.error('Failed to add order update to queue:', error);
