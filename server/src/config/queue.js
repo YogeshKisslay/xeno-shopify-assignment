@@ -41,32 +41,21 @@
 
 const { Queue } = require('bullmq');
 
-// This object will hold our queues, but they will be null at first.
-const queues = {
-  orderQueue: null,
-  customerQueue: null,
-  orderCancellationQueue: null,
-  orderUpdateQueue: null,
-};
+// --- THE FINAL FIX ---
+// We pass the Redis URL string directly to the connection option.
+// BullMQ's underlying library (ioredis) is designed to handle a full URL string.
+// If the URL is not provided, it will default to localhost, which is perfect for our local setup.
+const connection = process.env.REDIS_URL;
 
-// This is an initialization function that we will call from our main server file.
-const initializeQueues = () => {
-  // This is the correct way to get the connection details on Railway
-  const connection = {
-    host: process.env.REDISHOST,
-    port: process.env.REDISPORT,
-    password: process.env.REDISPASSWORD,
-  };
-
-  queues.orderQueue = new Queue('order-processing', { connection });
-  queues.customerQueue = new Queue('customer-processing', { connection });
-  queues.orderCancellationQueue = new Queue('order-cancellation-processing', { connection });
-  queues.orderUpdateQueue = new Queue('order-update-processing', { connection });
-  
-  console.log('BullMQ queues initialized successfully.');
-};
+// We no longer need lazy initialization. Let the library connect directly.
+const orderQueue = new Queue('order-processing', { connection });
+const customerQueue = new Queue('customer-processing', { connection });
+const orderCancellationQueue = new Queue('order-cancellation-processing', { connection });
+const orderUpdateQueue = new Queue('order-update-processing', { connection });
 
 module.exports = {
-  queues,
-  initializeQueues,
+  orderQueue,
+  customerQueue,
+  orderCancellationQueue,
+  orderUpdateQueue,
 };

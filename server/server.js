@@ -4,9 +4,6 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
-// We now import the initializer function
-const { initializeQueues } = require('./src/config/queue'); 
-
 const authRoutes = require('./src/routes/authRoutes');
 const shopifyRoutes = require('./src/routes/shopifyRoutes');
 const insightsRoutes = require('./src/routes/insightsRoutes');
@@ -43,21 +40,6 @@ app.use('/api/shopify', shopifyRoutes);
 app.use('/api/insights', insightsRoutes);
 app.use('/api/webhooks', webhookRoutes);
 
-// We wrap the server start in an async function
-const startServer = async () => {
-  try {
-    // 1. Initialize the queue connections to Redis
-    initializeQueues();
-
-    // 2. Only after the queues are ready, start the Express server
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
-  }
-};
-
-// Start the server
-startServer();
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
