@@ -2,15 +2,33 @@
 console.log("--- RAILWAY ENVIRONMENT VARIABLES (WORKER) ---");
 console.log(process.env);
 console.log("----------------------------------------------");
-require('dotenv').config(); // This is still needed for local development
+
+require('dotenv').config();
 const { Worker } = require('bullmq');
 const prisma = require('./config/db');
 
 console.log('Worker process started...');
 
-// --- THE PERMANENT FIX ---
-// The exact same simple connection logic as in queue.js.
-const connection = process.env.REDIS_URL;
+// The exact same robust parsing function as in queue.js.
+const parseRedisUrl = (redisUrl) => {
+  if (!redisUrl) {
+    return { host: 'localhost', port: 6379 };
+  }
+  try {
+    const url = new URL(redisUrl);
+    return {
+      host: url.hostname,
+      port: url.port,
+      password: url.password,
+      tls: {},
+    };
+  } catch (e) {
+    console.error("Invalid REDIS_URL, falling back to localhost");
+    return { host: 'localhost', port: 6379 };
+  }
+};
+
+const connection = parseRedisUrl(process.env.REDIS_URL);
 
 // --- All your job processor functions (processOrderJob, etc.) remain exactly the same ---
 const processOrderJob = async (job) => {
