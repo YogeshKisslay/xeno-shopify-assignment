@@ -1,12 +1,8 @@
 // server/server.js
 
-// --- THE FINAL FIX ---
-// Load environment variables FIRST, before any other code runs.
 require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
-const { queues } = require('./src/config/queue'); // This can now safely use the env vars
 
 const authRoutes = require('./src/routes/authRoutes');
 const shopifyRoutes = require('./src/routes/shopifyRoutes');
@@ -44,7 +40,6 @@ app.use('/api/shopify', shopifyRoutes);
 app.use('/api/insights', insightsRoutes);
 app.use('/api/webhooks', webhookRoutes);
 
-// We no longer need the lazy initialization. The library can handle it now.
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
