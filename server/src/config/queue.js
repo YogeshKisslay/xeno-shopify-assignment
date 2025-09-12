@@ -37,25 +37,53 @@
 //   initializeQueues,
 // };
 
-// server/src/config/queue.js
-
-const { Queue } = require('bullmq');
+// server/server.js
 
 // --- THE FINAL FIX ---
-// We pass the Redis URL string directly to the connection option.
-// BullMQ's underlying library (ioredis) is designed to handle a full URL string.
-// If the URL is not provided, it will default to localhost, which is perfect for our local setup.
-const connection = process.env.REDIS_URL;
+// Load environment variables FIRST, before any other code runs.
+require('dotenv').config();
 
-// We no longer need lazy initialization. Let the library connect directly.
-const orderQueue = new Queue('order-processing', { connection });
-const customerQueue = new Queue('customer-processing', { connection });
-const orderCancellationQueue = new Queue('order-cancellation-processing', { connection });
-const orderUpdateQueue = new Queue('order-update-processing', { connection });
+const express = require('express');
+const cors = require('cors');
+const { queues } = require('./src/config/queue'); // This can now safely use the env vars
 
-module.exports = {
-  orderQueue,
-  customerQueue,
-  orderCancellationQueue,
-  orderUpdateQueue,
+const authRoutes = require('./src/routes/authRoutes');
+const shopifyRoutes = require('./src/routes/shopifyRoutes');
+const insightsRoutes = require('./src/routes/insightsRoutes');
+const webhookRoutes = require('./src/routes/webhookRoutes');
+
+const app = express();
+
+const allowedOrigins = [
+  process.env.FRONTEND_URL, 
+  'http://localhost:5173'
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
 };
+
+app.use(cors(corsOptions));
+app.use(express.json());
+
+const PORT = process.env.PORT || 5001;
+
+app.get('/', (req, res) => {
+  res.status(200).send('Server is healthy and running!');
+});
+
+app.use('/api/auth', authRoutes);
+app.use('/api/shopify', shopifyRoutes);
+app.use('/api/insights', insightsRoutes);
+app.use('/api/webhooks', webhookRoutes);
+
+// We no longer need the lazy initialization. The library can handle it now.
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
