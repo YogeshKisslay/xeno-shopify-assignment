@@ -59,3 +59,25 @@
 //   orderCancellationQueue,
 //   orderUpdateQueue,
 // };
+
+// server/src/config/queue.js
+
+const { Queue } = require('bullmq');
+
+// --- THE PERMANENT FIX ---
+// We pass the Redis URL string directly to the connection option.
+// BullMQ's underlying library (ioredis) is designed to handle this correctly.
+// If the URL is not provided, it will correctly default to localhost for your local setup.
+const connection = process.env.REDIS_URL;
+
+const orderQueue = new Queue('order-processing', { connection });
+const customerQueue = new Queue('customer-processing', { connection });
+const orderCancellationQueue = new Queue('order-cancellation-processing', { connection });
+const orderUpdateQueue = new Queue('order-update-processing', { connection });
+
+module.exports = {
+  orderQueue,
+  customerQueue,
+  orderCancellationQueue,
+  orderUpdateQueue,
+};
