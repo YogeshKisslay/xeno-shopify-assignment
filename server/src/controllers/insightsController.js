@@ -53,10 +53,20 @@ const getTopCustomers = async (req, res) => {
 };
 const getOrdersOverTime = async (req, res) => {
   try {
-    // Get the date range from query parameters, default to the last 30 days
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(endDate.getDate() - 30);
+    // --- THE FIX IS HERE ---
+    // We now read the startDate and endDate from the request's query parameters.
+    // If they are not provided, we fall back to the last 30 days as a default.
+    const { startDate: startDateQuery, endDate: endDateQuery } = req.query;
+
+    const endDate = endDateQuery ? new Date(endDateQuery) : new Date();
+    let startDate;
+
+    if (startDateQuery) {
+      startDate = new Date(startDateQuery);
+    } else {
+      startDate = new Date();
+      startDate.setDate(endDate.getDate() - 30);
+    }
 
     // Use Prisma's raw query feature for powerful date grouping
     const ordersByDay = await prisma.$queryRaw`
