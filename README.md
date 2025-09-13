@@ -1,4 +1,4 @@
-Xeno Shopify Insights Dashboard
+# Xeno Shopify Insights Dashboard
 
 This project is a multi-tenant Shopify Data Ingestion & Insights Service, built as the final assignment for the Xeno Forward Deployed Engineer (FDE) Internship application. It simulates how Xeno helps enterprise retailers onboard, integrate, and analyze their customer data in real-time.
 
