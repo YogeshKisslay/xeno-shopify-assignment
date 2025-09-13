@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-  "start": "nodemon -r dotenv/config server.js",
-  "start:prod": "sleep 15 && npx prisma migrate deploy && node server.js",
-  "start:worker": "sleep 15 && npx prisma migrate deploy && node src/worker.js",
-  "test": "echo \"Error no test specified\" && exit 1"
-},
-
+    "start": "nodemon -r dotenv/config server.js",
+    "start:prod": "sleep 15 && npx prisma migrate deploy && node server.js",
+    "start:worker": "sleep 15 && npx prisma migrate deploy && node src/worker.js",
+    "test": "echo \"Error no test specified\" && exit 1"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -23,8 +22,7 @@
     "express": "^5.1.0",
     "ioredis": "^5.7.0",
     "jsonwebtoken": "^9.0.2",
-    "ngrok": "^5.0.0-beta.2",
-    "nodemailer": "^7.0.6"
+    "ngrok": "^5.0.0-beta.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.10",

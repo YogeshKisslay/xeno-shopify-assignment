@@ -15,7 +15,7 @@ import RegisterModal from './components/RegisterModal';
 // Pages
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
-import VerifyEmailPage from './pages/VerifyEmailPage';
+
 import ProfilePage from './pages/ProfilePage';
 
 // This special component allows us to use hooks like useLocation
@@ -47,7 +47,7 @@ const AppContent = () => {
                     </Route>
                 </Route>
 
-                <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
+           
                 <Route path="*" element={<Navigate to="/" />} />
             </Routes>
             
@@ -70,3 +70,4 @@ function App() {
 }
 
 export default App;
+
