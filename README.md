@@ -149,6 +149,15 @@ To test the real-time data sync locally, Shopify's servers need a way to send me
 #### 6. Running the Application
 To run the full application with real-time webhooks, you need to run **four separate processes** in four separate terminals.
 
+**Important Note on Scripts:** The main branch of this repository contains start:prod and start:worker scripts in server/package.json that include a sleep 15 command. This is a workaround for deployment stability on Railway and will cause errors if run locally. For local development, please ensure your scripts do not include the sleep or npx prisma migrate deploy commands
+##### The correct local scripts should be:
+     "scripts": {
+       "start": "nodemon -r dotenv/config server.js",
+       "start:prod": "node server.js",
+       "start:worker": "node src/worker.js",
+       "test": "echo \"Error no test specified\" && exit 1"
+     },
+
 - **Terminal 1 (Backend API):** `cd server` -> `npm start`
 - **Terminal 2 (Worker):** `cd server` -> `npm run start:worker`
 - **Terminal 3 (Frontend):** `cd client` -> `npm run dev`
