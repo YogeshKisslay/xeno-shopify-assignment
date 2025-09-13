@@ -8,7 +8,9 @@ Submission Date: September 11, 2025
 
 ---
 ### ✨ Live Demo
-[Link to your deployed Frontend on Vercel]
+Frontend (Vercel): https://xeno-shopify-assignment.vercel.app
+
+Backend API (Railway): https://xeno-shopify-assignment-production.up.railway.app
 
 (Note: The backend is deployed on Render's free tier, which may spin down after a period of inactivity. The first load might be slow as the service restarts.)
 
@@ -16,11 +18,11 @@ Submission Date: September 11, 2025
 ### ✅ Features Implemented
  1. This project covers all required features and several optional ones to demonstrate a robust, real-world architecture.
 
-2. Secure User Authentication: Full email/password flow with registration, JWT-based login, and email verification using Nodemailer.
+2. Secure User Authentication:Full email/password registration flow with JWT-based login. The system uses an instant verification model for deployment stability.
+3. Automatic Onboarding: For new users, the application automatically triggers a one-time historical data ingestion process on their first login, creating a seamless onboarding experience.
 
-3. Real-time Data Sync: A comprehensive webhook system that listens for Shopify events (Order Creation, Order Cancellation, Order Update/Fulfillment, Customer Creation) and updates the database in real-time.
-4. Scalable Background Processing: Asynchronous job handling using a Redis queue (BullMQ) and a separate Node.js worker process. This ensures the API remains fast and responsive, even under heavy webhook load.
-5. Historical Data Ingestion: Manual API endpoints to pull all historical data (Customers, Products, Orders) from a Shopify store for initial setup.
+4. Real-time Data Sync: A comprehensive webhook system listens for Shopify events (`Order Creation`, `Order Cancellation`, `Order Update/Fulfillment`, `Customer Creation`) and updates the database in real-time.
+5. Scalable Background Processing: Asynchronous job handling using a **Redis** queue (BullMQ) and a separate Node.js worker process. This ensures the API remains fast and responsive, even under heavy webhook load.
 6. Interactive Insights Dashboard:
    
    1. KPIs: Real-time cards for Total Revenue, Total Orders, and Total Customers.
@@ -28,14 +30,16 @@ Submission Date: September 11, 2025
    2. Top Customers: A live-updating list of the top 5 customers by total spend.
    
    3. Orders Chart: An interactive line chart showing orders over time, complete with a date-range filter.
-7. Multi-Tenant Architecture: The database schema is designed with a storeId on all relevant tables to ensure data is perfectly isolated for each connected store.
+7. Multi-Tenant Architecture: The database schema is designed with a `storeId` on all relevant tables to ensure data is perfectly isolated for each connected store.
 8. Creative & Responsive UI: A modern, fully responsive "glassmorphism" UI built with React and Tailwind CSS, featuring smooth animations powered by Framer Motion.
-9. Professional Tooling: Utilizes Prisma as an ORM, Docker for managing the Redis instance, and a clean, feature-based project structure.
+9. Professional Deployment: The entire stack is deployed to modern cloud platforms (Vercel & Railway), using a CI/CD workflow from GitHub.
 
 ---
 ### 🏗️ Architecture Diagram
 The application is designed with a clear separation of concerns, ensuring scalability and maintainability.
-graph TD
+
+    graph TD
+       
     subgraph User
         A[React Frontend on Vercel]
     end
@@ -77,8 +81,8 @@ Flow:
     Backend :Node.js, Express.js
     Database :MySQL, Prisma (ORM)
     Queueing :Redis, BullMQ
-    DevOps :Docker (for local Redis)
-    Libraries :Framer Motion, Recharts, Nodemailer, JWT
+    Deployment :Vercel (Frontend), Railway (Backend)
+    Libraries :Framer Motion, Recharts, JWT
 
 ---
 ### 🚀 Local Setup Instructions
@@ -96,7 +100,7 @@ Flow:
     cd xeno-shopify-assignment
 
 #### 2. Backend Setup (/server directory)
-  1. Navigate to the server folder: `cd server`.
+  1. Navigate to the `server` folder: `cd server`.
 
   2. Install dependencies: `npm install`.
 
@@ -110,9 +114,8 @@ Flow:
             SHOPIFY_STORE_URL="your-store-name.myshopify.com"
             SHOPIFY_ADMIN_ACCESS_TOKEN="your_shopify_admin_access_token"
             
-            ##### Gmail Credentials for Nodemailer (You can use these email credentials as it is or you may create your own email App password from your gmail account->manage your account)
-            EMAIL_USER="yogeshkont48445@gmai.com"
-            EMAIL_PASS="gtql qlgz ftnk jewh"
+            # Frontend URL (for local testing)
+            FRONTEND_URL="http://localhost:5173"
 
   4. Apply the database schema: `npx prisma migrate dev`.
 
@@ -155,27 +158,26 @@ To run the full application with real-time webhooks, you need to run **four sepa
 ### 🗄️ Database Schema (Prisma)
     // User model for dashboard authentication
     model User {
-      id                 Int      @id @default(autoincrement())
-      email              String   @unique
-      name               String?
-      password           String
-      isVerified         Boolean  @default(false)
-      verificationToken  String?  @unique
-      createdAt          DateTime @default(now())
-      updatedAt          DateTime @updatedAt
+      id        Int      @id @default(autoincrement())
+      email     String   @unique
+      name      String?
+      password  String
+      createdAt DateTime @default(now())
+      updatedAt DateTime @updatedAt
     }
     
     // Represents a single Shopify store (tenant)
     model Store {
-      id          Int      @id @default(autoincrement())
-      shopifyId   String   @unique
-      storeUrl    String   @unique
-      accessToken String
-      createdAt   DateTime @default(now())
-      updatedAt   DateTime @updatedAt
-      customers Customer[]
-      products  Product[]
-      orders    Order[]
+      id                       Int      @id @default(autoincrement())
+      shopifyId                String   @unique
+      storeUrl                 String   @unique
+      accessToken              String
+      hasIngestedInitialData   Boolean  @default(false)
+      createdAt                DateTime @default(now())
+      updatedAt                DateTime @updatedAt
+      customers                Customer[]
+      products                 Product[]
+      orders                   Order[]
     }
     
     // Stores customer data for a specific store
@@ -222,22 +224,21 @@ To run the full application with real-time webhooks, you need to run **four sepa
       @@map("orders")
     }
 
+
 ---
 ### 📝 Assumptions & Limitations
-  1. Single Tenant Config: While the architecture is multi-tenant by design, the current implementation is configured for a single store via .env variables. A full multi-tenant onboarding flow (like Shopify OAuth) would be the next step.
+  1. Single Tenant Config: While the architecture is multi-tenant by design, the current implementation is configured for a single store via `.env` variables. A full multi-tenant onboarding flow (like Shopify OAuth) would be the next step.
 
   2. Webhook Security: The webhook endpoints do not currently verify Shopify's HMAC signature. In a production environment, this is a critical security step.
 
   3. UI Refresh Mechanism: The dashboard uses polling for simplicity. For a true real-time experience, WebSockets would be a better solution.
 
-  4. Manual Ingestion Errors: The manual ingestion scripts do not currently have robust error handling or retry logic for individual records.
-
 ---
 ### 🔮 Next Steps to Productionize
-  1. Implement Shopify OAuth: Create a proper onboarding flow where merchants can connect their stores and have their credentials stored securely.
+  1. Implement Shopify OAuth: Create a proper onboarding flow where merchants can connect their stores.
 
   2. Webhook Signature Verification: Add a middleware to verify the X-Shopify-Hmac-SHA256 header on all incoming webhooks.
-
-  3. Comprehensive Logging & Monitoring: Integrate a logging service and an error monitoring service to track application health.
+    
+  3. Comprehensive Logging & Monitoring: Integrate a logging service (like Winston) and an error monitoring service (like Sentry).
 
   4. Switch to WebSockets: Replace frontend polling with a WebSocket connection for instant UI updates.
