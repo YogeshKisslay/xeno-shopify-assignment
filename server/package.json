@@ -4,8 +4,8 @@
   "main": "server.js",
   "scripts": {
     "start": "nodemon -r dotenv/config server.js",
-    "start:prod": "sleep 15 && npx prisma migrate deploy && node server.js",
-    "start:worker": "sleep 15 && npx prisma migrate deploy && node src/worker.js",
+    "start:prod": "node server.js",
+    "start:worker": "node src/worker.js",
     "test": "echo \"Error no test specified\" && exit 1"
   },
   "keywords": [],
