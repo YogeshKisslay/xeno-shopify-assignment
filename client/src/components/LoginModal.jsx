@@ -1,4 +1,4 @@
-// client/src/components/LoginModal.jsx
+
 
 import React, { useState, useEffect } from 'react';
 // --- NEW: Import useLocation to read navigation state ---

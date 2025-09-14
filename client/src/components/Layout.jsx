@@ -1,4 +1,4 @@
-// client/src/components/Layout.jsx
+
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, Outlet } from 'react-router-dom';

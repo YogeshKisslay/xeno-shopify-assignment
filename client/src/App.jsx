@@ -1,4 +1,4 @@
-// client/src/App.jsx
+
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
@@ -25,7 +25,7 @@ const AppContent = () => {
     const ProtectedRoute = () => {
       const { token, loading } = useAuth();
       if (loading) return <div>Loading...</div>;
-      // --- FIX: Redirect to the public landing page if not logged in ---
+      //  Redirect to the public landing page if not logged in ---
       return token ? <Outlet /> : <Navigate to="/" />;
     };
 
@@ -34,7 +34,7 @@ const AppContent = () => {
             {/* The main page routes */}
             <Routes location={location} key={location.pathname}>
                 <Route path="/" element={<Layout />}>
-                    {/* --- THE MAIN FIX IS HERE --- */}
+                    
                     {/* This tells the router to show the LandingPage for all these paths */}
                     <Route index element={<LandingPage />} />
                     <Route path="login" element={<LandingPage />} />

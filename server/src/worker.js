@@ -22,7 +22,7 @@ const parseRedisUrl = (redisUrl) => {
       password: url.password,
     };
 
-    // --- THE FINAL FIX IS HERE ---
+    
     // If the protocol is 'rediss:', it means we need a secure TLS connection.
     // Railway and Upstash both require this for public connections.
     if (url.protocol === 'rediss:') {
@@ -37,7 +37,7 @@ const parseRedisUrl = (redisUrl) => {
 };
 
 const connection = parseRedisUrl(process.env.REDIS_URL);
-// --- All your job processor functions (processOrderJob, etc.) remain exactly the same ---
+
 const processOrderJob = async (job) => {
   console.log(`Processing ORDER job ${job.id}...`);
   const { storeUrl, orderData } = job.data;

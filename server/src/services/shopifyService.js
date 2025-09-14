@@ -1,4 +1,4 @@
-// src/services/shopifyService.js
+
 const axios = require('axios');
 
 // Function to test the Shopify API connection
@@ -52,7 +52,7 @@ const getProducts = async (storeUrl, accessToken) => {
 
 const getOrders = async (storeUrl, accessToken) => {
   try {
-    // --- FIX: Added financial_status filter to ignore cancelled/voided orders ---
+    // Added financial_status filter to ignore cancelled/voided orders ---
     const shopifyApiUrl = `https://${storeUrl}/admin/api/2024-04/orders.json?status=any&financial_status=paid,partially_refunded`;
     const response = await axios.get(shopifyApiUrl, {
       headers: {

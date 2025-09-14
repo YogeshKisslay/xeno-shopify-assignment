@@ -1,4 +1,3 @@
-// client/src/api/axios.js
 
 import axios from 'axios';
 
