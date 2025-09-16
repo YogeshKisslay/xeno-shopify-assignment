@@ -12,7 +12,6 @@ Frontend (Vercel): https://xeno-shopify-assignment.vercel.app
 
 Backend API (Railway): https://xeno-shopify-assignment-production.up.railway.app
 
-(Note: The backend is deployed on Render's free tier, which may spin down after a period of inactivity. The first load might be slow as the service restarts.)
 
 ---
 ### ✅ Features Implemented
